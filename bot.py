@@ -1,4 +1,5 @@
 import logging
+import holidays
 import os
 import pandas as pd
 import psutil
@@ -9,7 +10,7 @@ from botcity.plugins.slack import BotSlackPlugin
 from botcity.web import WebBot, Browser, By
 from botcity.web.browsers.chrome import default_options
 from credencial import segredos
-from datetime import datetime
+from datetime import date, datetime
 from selenium.common.exceptions import WebDriverException
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -23,7 +24,7 @@ def main():
     desktop_bot = DesktopBot()
     files = BotFilesPlugin()
     webbot = WebBot()
-
+    logging.info('-----BOT IMPORT CERTIDAO ONR Iniciado')
     try:
         token_slack = segredos.get('segredo_slack')
         channel_slack = segredos.get('segredo_slack_channel')
@@ -43,6 +44,16 @@ def main():
             client = BotSlackPlugin(slack_token=token_slack, channel=channel_slack)
             logging.info('CONEXÃO OK COM API SLACK')
             pass
+
+    # Validar Feriado
+
+    br_holidays = holidays.Brazil()
+    today = datetime.today()
+    if today in br_holidays:
+        logging.info(f"Hoje é feriado: {br_holidays[today]}. A operação não pode continuar.")
+        logging.info('-----BOT CERTIDAO ONR FINALIZADO')
+        return
+
 
     # VARIAVEIS DE COMUNICACAO
 
