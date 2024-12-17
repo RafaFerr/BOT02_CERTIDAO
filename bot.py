@@ -1,5 +1,6 @@
 import logging
 import holidays
+import holidays.countries
 import os
 import pandas as pd
 import psutil
@@ -18,7 +19,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 def main():
     data_atual_com_traco = datetime.today().date().strftime("%d-%m-%Y")
     agora = datetime.now().strftime('%d-%m-%Y_%H-%M')
-    logging.basicConfig(level=logging.INFO, filename=fr'\\192.168.0.5\COMPARTILHADA\CONTROLE_CNIB\13_log\bot02_certidao\log_certidao_onr_{data_atual_com_traco}.log',
+    logging.basicConfig(level=logging.INFO,
+                        filename=fr'\\192.168.0.5\COMPARTILHADA\CONTROLE_CNIB\13_log\bot02_certidao\log_certidao_onr_{data_atual_com_traco}.log',
                         format="%(asctime)s $ %(message)s", datefmt='%d/%m/%Y %H:%M:%S', encoding='utf-8')
 
     desktop_bot = DesktopBot()
@@ -54,14 +56,13 @@ def main():
         logging.info('-----BOT CERTIDAO ONR FINALIZADO')
         return
 
-
     # VARIAVEIS DE COMUNICACAO
 
     user_register = segredos.get('segredo_userregister')
     user_register2 = segredos.get('segredo_userregister2')
     senha_register = segredos.get('segredo_senharegister')
     token = segredos.get('segredo_tokenA3')
-    
+
     #FECHANDO INSTANCIAS DO REGISTER
     for i in range(4):
         try:
@@ -88,12 +89,12 @@ def main():
         webbot.browser = Browser.CHROME
         download_folder_path = r'\\safira\COMPARTILHADA\CONTROLE_CNIB\10_arquivos_zip'
         logging.info(fr'PASTA {download_folder_path} DEFINIDA')
-        # try:
-        #     webbot.driver_path = ChromeDriverManager().install()
-        #     logging.info('INSTANCIA WEBDRIVER MANAGER')
-        # except:
-        webbot.driver_path = r"\\SAFIRA\COMPARTILHADA\CONTROLE_CNIB\12_extensoes\chromedriver.exe"
-        logging.info('INSTANCIA WEBDRIVER LOCAL')
+        try:
+            webbot.driver_path = ChromeDriverManager().install()
+            logging.info('INSTANCIA WEBDRIVER MANAGER')
+        except:
+            webbot.driver_path = r"\\SAFIRA\COMPARTILHADA\CONTROLE_CNIB\12_extensoes\chromedriver.exe"
+            logging.info('INSTANCIA WEBDRIVER LOCAL')
         extension_path = r"\\Safira\COMPARTILHADA\CONTROLE_CNIB\12_extensoes\webpki-chrome-ext.crx"
         logging.info(fr'{extension_path} CARREGADA')
         def_options = default_options()
@@ -113,7 +114,8 @@ def main():
             logging.info('PAGINA CARREGADA')
             desktop_bot.wait(2000)
             if webbot.find("alerta", matching=0.97, waiting_time=5000):
-                desktop_bot.get_screenshot(fr"\\Safira\COMPARTILHADA\CONTROLE_CNIB\14_prints\bot02_certidao\alerta_{agora}")
+                desktop_bot.get_screenshot(
+                    fr"\\Safira\COMPARTILHADA\CONTROLE_CNIB\14_prints\bot02_certidao\alerta_{agora}")
                 webbot.click_relative(315, 8)
                 logging.info('MENSAGEM DE ALERTA')
             else:
@@ -148,7 +150,7 @@ def main():
         logging.info('CERTIFICADO SELECIONADO')
         desktop_bot.wait(1500)
 
-        while desktop_bot.find( 'erro' ,waiting_time=5000):
+        while desktop_bot.find('erro', waiting_time=5000):
             print('ERRO CERTIFICADO')
             logging.info('ERRO CERTIFICADO')
             desktop_bot.enter()
@@ -169,13 +171,13 @@ def main():
         desktop_bot.tab(presses=2)
         desktop_bot.enter()
 
-        desktop_bot.find( "pin", matching=0.97, waiting_time=10000)
+        desktop_bot.find("pin", matching=0.97, waiting_time=10000)
         desktop_bot.wait(2000)
         desktop_bot.kb_type(text=token)
         logging.info('DIGITADO TOKEN')
         desktop_bot.enter()
 
-        if webbot.find( "falha_acesso", matching=0.97, waiting_time=2000):
+        if webbot.find("falha_acesso", matching=0.97, waiting_time=2000):
             desktop_bot.wait(2000)
             webbot.stop_browser()
             logging.info('FALHA ACESSO')
@@ -194,7 +196,7 @@ def main():
             desktop_bot.tab(presses=2)
             desktop_bot.enter()
 
-            desktop_bot.find( "pin", matching=0.97, waiting_time=10000)
+            desktop_bot.find("pin", matching=0.97, waiting_time=10000)
             desktop_bot.wait(2000)
             desktop_bot.kb_type(text=token)
             desktop_bot.enter()
@@ -206,27 +208,25 @@ def main():
     response_message = client.send_simple_message(text='OFICIO ELETRONICO ACESSADO - CERTIDAO')
 
     webbot.wait(2000)
-    # if webbot.find_element('a.cc-btn:nth-child(1)', by=By.CSS_SELECTOR):
-    #     permitir_cookies = webbot.find_element('a.cc-btn:nth-child(1)', by=By.CSS_SELECTOR)
-    #     permitir_cookies.click()
-    #     print('CLICAR PERMITIR COOKIES')
-    # else:
-    #     print('SEM COOKIES')
-    #     pass
-    # webbot.wait(1000)
 
-    if desktop_bot.find( "pendentes", matching=0.97, waiting_time=2000):
+    if webbot.find_element('#popupDivTermo', by=By.CSS_SELECTOR):
+        btFecharPopup = webbot.find_element('#divModalMSGCTP > div > div > div.d-flex.justify-content-end > button:nth-child(2)',by=By.CSS_SELECTOR)
+        btFecharPopup.click()
+    else:
+        pass
+
+    if desktop_bot.find("pendentes", matching=0.97, waiting_time=2000):
         print('achou pendentes')
         logging.info('ALERTA PENDENTES')
         desktop_bot.click_relative(-174, 217)
-    elif desktop_bot.find( "comunicado2", matching=0.97, waiting_time=10000):
+    elif desktop_bot.find("comunicado2", matching=0.97, waiting_time=10000):
         print('achou comunicado')
         logging.info('ALERTA COMUNICADO')
         desktop_bot.click_relative(368, -28)
-    elif webbot.find_element('//*[@id="popupComunicado"]',by=By.XPATH):
+    elif webbot.find_element('//*[@id="popupComunicado"]', by=By.XPATH):
         logging.info('CERTIFICADO SELECIONADO')
         print('achou popup')
-        if webbot.find_element('#popupComunicado > div > div > div.modal-header > button',by=By.CSS_SELECTOR):
+        if webbot.find_element('#popupComunicado > div > div > div.modal-header > button', by=By.CSS_SELECTOR):
             botao_fechar = webbot.find_element('#popupComunicado > div > div > div.modal-header > button',
                                                by=By.CSS_SELECTOR)
             try:
@@ -239,17 +239,19 @@ def main():
         print('nao achou nada')
         pass
 
-    certidao_emitir = webbot.find_element('#tabledash > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(1) > a:nth-child(1)',by=By.CSS_SELECTOR,waiting_time=60000)
+    certidao_emitir = webbot.find_element(
+        '#tabledash > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(1) > a:nth-child(1)', by=By.CSS_SELECTOR,
+        waiting_time=60000)
     certidao_emitir.click()
     desktop_bot.wait(1500)
     logging.info('CERTIDOES A EMITIR')
-    if desktop_bot.find( "pendentes", matching=0.97, waiting_time=2000):
+    if desktop_bot.find("pendentes", matching=0.97, waiting_time=2000):
         desktop_bot.click_relative(-174, 217)
         logging.info('ALERTA PENDENTES')
     else:
         logging.info('SEM PENDENTES')
         pass
-    desktop_bot.find( "cert_emitir", matching=0.97, waiting_time=15000)
+    desktop_bot.find("cert_emitir", matching=0.97, waiting_time=15000)
     for i in range(2):
         print(i)
         if i == 0:
@@ -281,7 +283,7 @@ def main():
                 else:
                     print('não existe')
             desktop_bot.wait(2000)
-            bt_exportar = webbot.find_element('/html/body/section/div[1]/div/div[2]/ul/li[3]/button',by=By.XPATH)
+            bt_exportar = webbot.find_element('/html/body/section/div[1]/div/div[2]/ul/li[3]/button', by=By.XPATH)
             bt_exportar.click()
             webbot.wait(1000)
             logging.info('CLQ BOTAO EXPORTAR EM ABERTO')
@@ -307,17 +309,17 @@ def main():
             else:
                 print('não existe')
             print('CLICAR EXPORTAR')
-            if desktop_bot.find( 'erro',waiting_time=3000):
+            if desktop_bot.find('erro', waiting_time=3000):
                 logging.info('ERRO')
                 desktop_bot.enter()
                 desktop_bot.wait(2000)
                 continue
             else:
-                desktop_bot.find( "bt_download", matching=0.97, waiting_time=30000)
+                desktop_bot.find("bt_download", matching=0.97, waiting_time=30000)
                 bt_download = webbot.find_element('#btnDownloadXML', by=By.CSS_SELECTOR)
                 bt_download.click()
                 logging.info('CLQ BOTAO DOWNLOAD')
-                desktop_bot.click_at(866,222)
+                desktop_bot.click_at(866, 222)
                 logging.info('AGUARDANDO ARQUIVO')
                 webbot.wait_for_new_file(path=webbot.download_folder_path, file_extension=".zip", timeout=10000)
                 logging.info('ARQUIVO BAIXADO')
@@ -370,7 +372,7 @@ def main():
                 print('não existe')
             print('CLICAR EXPORTAR')
 
-            desktop_bot.find( "bt_download", matching=0.97, waiting_time=30000)
+            desktop_bot.find("bt_download", matching=0.97, waiting_time=30000)
 
             bt_download = webbot.find_element('#btnDownloadXML', by=By.CSS_SELECTOR)
             bt_download.click()
@@ -390,10 +392,10 @@ def main():
     logging.info('EXECUTANDO REGISTER')
     print('ACESSANDO REGISTER')
     # AGUARDANDO TELA DE LOGIN
-    desktop_bot.find( 'acessar_register', matching=0.97, waiting_time=35000)
+    desktop_bot.find('acessar_register', matching=0.97, waiting_time=35000)
     print('AGUARDANDO LOGIN')
 
-    if not desktop_bot.find( "campo_nome", matching=0.97, waiting_time=10000):
+    if not desktop_bot.find("campo_nome", matching=0.97, waiting_time=10000):
         not_found("campo_nome")
     desktop_bot.delete()
     desktop_bot.paste(user_register)
@@ -403,14 +405,14 @@ def main():
     print('ACESSO OK')
     logging.info('LOGIN REALIZADO')
 
-    if desktop_bot.find( "atencao", matching=0.97, waiting_time=3000):
+    if desktop_bot.find("atencao", matching=0.97, waiting_time=3000):
         logging.info('ERRO NO LOGIN')
         print('erro no acesso tentativa nova')
         desktop_bot.enter()
         desktop_bot.wait(1000)
         desktop_bot.execute(app_path)
-        desktop_bot.find( 'acessar_register', matching=0.97, waiting_time=35000)
-        if not desktop_bot.find( "campo_nome", matching=0.97, waiting_time=10000):
+        desktop_bot.find('acessar_register', matching=0.97, waiting_time=35000)
+        if not desktop_bot.find("campo_nome", matching=0.97, waiting_time=10000):
             not_found("campo_nome")
         desktop_bot.delete()
         desktop_bot.paste(user_register2)
@@ -419,7 +421,7 @@ def main():
         desktop_bot.paste(senha_register)
         desktop_bot.enter()
         print('LOGIN NO REGISTER REALIZADO')
-    elif desktop_bot.find( 'error', matching=0.97, waiting_time=3000):
+    elif desktop_bot.find('error', matching=0.97, waiting_time=3000):
         logging.info('ERRO NO LOGIN 2')
         print('erro no usuario ou senha')
         try:
@@ -431,7 +433,7 @@ def main():
             desktop_bot.enter()
             desktop_bot.paste(senha_register)
             desktop_bot.enter()
-            if not desktop_bot.find( "cadastro", matching=0.97, waiting_time=10000):
+            if not desktop_bot.find("cadastro", matching=0.97, waiting_time=10000):
                 conta = 1 / 0  # FORÇAR ERRO PARA PULAR PARA O EXCEPT
                 logging.info('FORÇANDO SAIDA PARA EXCEPT')
         except:
@@ -445,7 +447,7 @@ def main():
             desktop_bot.enter()
     else:
         pass
-    if desktop_bot.find( 'cadastro', waiting_time=20000):
+    if desktop_bot.find('cadastro', waiting_time=20000):
         # Abrir tela de cadastro de indisponibilidade
         desktop_bot.type_keys(['alt', 'e', 'c'])
         desktop_bot.wait(1200)
@@ -457,9 +459,9 @@ def main():
                         destination_folder=r'\\safira\COMPARTILHADA\CONTROLE_CNIB\11_arquivos_extraidos')
         logging.info(fr'{zipado} - EXTRAIDO')
     desktop_bot.wait(2000)
-    desktop_bot.find( "bt_onr", waiting_time=10000)
+    desktop_bot.find("bt_onr", waiting_time=10000)
     print('botao onr acionado')
-    if not desktop_bot.find( "bt_onr", matching=0.97, waiting_time=10000):
+    if not desktop_bot.find("bt_onr", matching=0.97, waiting_time=10000):
         not_found("bt_onr")
     desktop_bot.click()
     logging.info('BTN ONR ACIONADO')
@@ -476,30 +478,30 @@ def main():
         print('copiado')
         desktop_bot.wait(2000)
 
-        desktop_bot.type_keys(['shift','tab'])
+        desktop_bot.type_keys(['shift', 'tab'])
         desktop_bot.enter()
         print('importando')
-        while desktop_bot.find( "aguardar", matching=0.97, waiting_time=2000):
+        while desktop_bot.find("aguardar", matching=0.97, waiting_time=2000):
             desktop_bot.wait(2000)
             print('aguardando importar')
         else:
-            if desktop_bot.find( 'atencao'):
+            if desktop_bot.find('atencao'):
                 desktop_bot.wait(2000)
                 desktop_bot.enter()
-                if not desktop_bot.find( "campo_arisp", matching=0.97, waiting_time=5000):
+                if not desktop_bot.find("campo_arisp", matching=0.97, waiting_time=5000):
                     not_found("campo_arisp")
                 desktop_bot.click_relative(-1, 68)
                 desktop_bot.control_a()
                 desktop_bot.delete()
             else:
-                if not desktop_bot.find( "campo_arisp", matching=0.97, waiting_time=5000):
+                if not desktop_bot.find("campo_arisp", matching=0.97, waiting_time=5000):
                     not_found("campo_arisp")
                 desktop_bot.click_relative(-1, 68)
                 desktop_bot.control_a()
                 desktop_bot.delete()
     print('saiu do for')
 
-    if not desktop_bot.find( "bt_fechar", matching=0.97, waiting_time=10000):
+    if not desktop_bot.find("bt_fechar", matching=0.97, waiting_time=10000):
         not_found("bt_fechar")
     desktop_bot.click()
     enviar_chat = 1
@@ -519,11 +521,11 @@ def main():
         total_contatos = len(contatos['NOME'])
 
         desktop_bot.execute(r"C:\Program Files\Spark\Spark.exe")
-        desktop_bot.find( 'spark', waiting_time=10000)
+        desktop_bot.find('spark', waiting_time=10000)
         desktop_bot.wait(1000)
         desktop_bot.type_keys(['alt', 'l'])
         print('ABRINDO SPARK')
-        if desktop_bot.find( "online", matching=0.97, waiting_time=10000):
+        if desktop_bot.find("online", matching=0.97, waiting_time=10000):
             logging.info('SPARK ONLINE')
             for i in range(total_contatos):
                 desktop_bot.wait(1000)
@@ -554,11 +556,11 @@ def main():
         total_contatos = len(contatos['NOME'])
         # ROTINA PARA ENVIAR MENSAGEM PARA O SETOR RESPONSAVEL POR SELAR E IMPRIMIR
         desktop_bot.execute(r"C:\Program Files\Spark\Spark.exe")
-        desktop_bot.find( 'spark', waiting_time=10000)
+        desktop_bot.find('spark', waiting_time=10000)
         desktop_bot.wait(1000)
         desktop_bot.type_keys(['alt', 'l'])
         print('ABRINDO SPARK')
-        if desktop_bot.find( "online", matching=0.97, waiting_time=10000):
+        if desktop_bot.find("online", matching=0.97, waiting_time=10000):
             for i in range(total_contatos):
                 desktop_bot.wait(1000)
                 desktop_bot.control_f()
